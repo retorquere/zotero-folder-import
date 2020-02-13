@@ -9,70 +9,70 @@
   ondialogcancel="return onCancel();"
   buttonlabelextra1="&better-bibtex.bulk-keys-confirm.whatever;">
 
-  <script type="text/javascript">
-    function onLoad() {
-      const params = window.arguments[0]
-
-      const defaults = [
-        'pdf',
-        'docx',
-        'html',
-        'odt',
-      ]
-
-      const extensions = document.getElementById('folder-import-extensions')
-      for (const ext of Array.from(params.extensions).sort()) {
-        const cb = document.createElement('checkbox')
-        cb.setAttribute('label', ext)
-        cb.setAttribute('value', ext)
-        cb.setAttribute('id', `folder-import-ext-${ext}`)
-        cb.setAttribute('checked', defaults.includes(ext))
-        extensions.appendChild(cb)
-      }
-
-      const mode = document.getElementById('folder-import-link-or-import')
-      mode.selectedItem = document.getElementById('folder-import-import')
-      if (!mode.link) mode.setAttribute('disabled', true)
-    }
-
-    function selected() {
-      return Array.from(document.querySelectorAll('checkbox'))
-        .filter(ext => ext.checked)
-        .map(ext => ext.getAttribute('value'))
-    }
-
-    function selectionChanged() {
-      if (!linkMode()) {
-        const lnk = document.getElementById('folder-import-ext-lnk')
-        if (lnk) lnk.checked = false
-      }
-    }
-
-    function onCancel() {
-      const params = window.arguments[0]
-
-      params.extensions = new Set
-      return true
-    }
-
-    function linkMode() {
-      return document.getElementById('folder-import-link-or-import').selectedItem === document.getElementById('folder-import-link')
-    }
-
-    function onAccept() {
-      const params = window.arguments[0]
-
-      params.link = linkMode()
-      params.extensions = new Set(selected())
-      return true
-    }
-  </script>
-
-  <vbox id="folder-import-extensions" flex="1" style="height:50em;overflow: auto;"/>
+  <listbox id="folder-import-extensions" seltype="multiple" rows="30" width="400" onselect="selectionChanged()"/>
 
   <radiogroup id="folder-import-link-or-import" onselect="selectionChanged()">
     <radio id="folder-import-link" label="Link to files" value="link"/>
     <radio id="folder-import-import" label="Store copy of files" value="store"/>
   </radiogroup>
 
+  <script type="text/javascript">
+    let params, extensions, mode
+
+    function onLoad() {
+      params = window.arguments[0]
+      extensions = document.getElementById('folder-import-extensions')
+      mode = document.getElementById('folder-import-link-or-import')
+
+      const defaults = [
+        'pdf',
+        'docx',
+        'html',
+        'odt',
+      ].sort().reverse()
+
+      for (const ext of Array.from(params.extensions).sort()) {
+        const li = extensions.appendItem(ext, ext)
+        li.setAttribute('id', `folder-import-ext-${ext}`)
+        // if (defaults.includes(ext)) extensions.addItemToSelection(li)
+        extensions.appendChild(li)
+      }
+      if (params.extensions.size > 1) {
+        for (const ext of defaults) {
+          const li = document.getElementById(`folder-import-ext-${ext}`)
+          if (li) extensions.insertBefore(li, extensions.firstElementChild)
+        }
+      }
+
+      mode.selectedItem = document.getElementById('folder-import-import')
+      if (!mode.link) mode.setAttribute('disabled', true)
+    }
+
+    function selected() {
+      return Array.from(extensions.selectedItems)
+        .map(ext => ext.getAttribute('value'))
+        .filter(ext => params.link || ext !== 'lnk')
+    }
+
+    function selectionChanged() {
+      if (linkMode()) return
+      const lnk = document.getElementById('folder-import-ext-lnk')
+      if (lnk) extensions.removeItemFromSelection(lnk)
+    }
+
+    function onCancel() {
+      params.extensions = new Set
+      return true
+    }
+
+    function linkMode() {
+      return mode.selectedItem === document.getElementById('folder-import-link')
+    }
+
+    function onAccept() {
+      params.link = linkMode()
+      params.extensions = new Set(selected())
+      return true
+    }
+  </script>
 </dialog>

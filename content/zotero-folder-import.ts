@@ -90,7 +90,7 @@ class FolderScanner {
     debug(`scanned ${this.path}: ${JSON.stringify(Array.from(this.extensions))}`)
   }
 
-  public async import(params, collection) {
+  public async import(params, collection, pdfs) {
     // don't do anything if no selected extensions exist in this folder
     if (! [...this.extensions].find(ext => params.extensions.has(ext))) return
 
@@ -103,7 +103,6 @@ class FolderScanner {
       await collection.saveTx()
     }
 
-    const pdfs = []
     for (const file of this.files) {
       if (!params.extensions.has(this.extension(file))) continue
       debug(`${this.path}: importing ${file}`)
@@ -127,10 +126,9 @@ class FolderScanner {
         debug(err)
       }
     }
-    if (pdfs.length) Zotero.RecognizePDF.autoRecognizeItems(pdfs)
 
     for (const folder of this.folders) {
-      await folder.import(params, collection)
+      await folder.import(params, collection, pdfs)
     }
   }
 
@@ -203,7 +201,9 @@ const FolderImport = Zotero.FolderImport || new class { // tslint:disable-line:v
       // TODO: warn for .lnk files when params.link === false
       (window as any).openDialog('chrome://zotero-folder-import/content/import.xul', '', 'chrome,dialog,centerscreen,modal', params)
       if (params.extensions.size) {
-        await root.import(params, ZoteroPane_Local.getSelectedCollection())
+        const pdfs = []
+        await root.import(params, ZoteroPane_Local.getSelectedCollection(), pdfs)
+        if (pdfs.length) Zotero.RecognizePDF.autoRecognizeItems(pdfs)
       }
     }
   }
