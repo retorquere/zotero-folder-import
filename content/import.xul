@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://zotero-better-bibtex/locale/zotero-better-bibtex.dtd">
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  title="Add Files from Folder…"
+  buttons="accept,cancel"
+  onload="onLoad();"
+  ondialogaccept="return onAccept();"
+  ondialogcancel="return onCancel();"
+  buttonlabelextra1="&better-bibtex.bulk-keys-confirm.whatever;">
+
+  <script type="text/javascript">
+    function onLoad() {
+      const params = window.arguments[0]
+
+      const defaults = [
+        'pdf',
+        'docx',
+        'html',
+        'odt',
+      ]
+
+      const extensions = document.getElementById('folder-import-extensions')
+      for (const ext of Array.from(params.extensions).sort()) {
+        const cb = document.createElement('checkbox')
+        cb.setAttribute('label', ext)
+        cb.setAttribute('value', ext)
+        cb.setAttribute('id', `folder-import-ext-${ext}`)
+        cb.setAttribute('checked', defaults.includes(ext))
+        extensions.appendChild(cb)
+      }
+
+      const mode = document.getElementById('folder-import-link-or-import')
+      mode.selectedItem = document.getElementById('folder-import-import')
+      if (!mode.link) mode.setAttribute('disabled', true)
+    }
+
+    function selected() {
+      return Array.from(document.querySelectorAll('checkbox'))
+        .filter(ext => ext.checked)
+        .map(ext => ext.getAttribute('value'))
+    }
+
+    function selectionChanged() {
+      if (!linkMode()) {
+        const lnk = document.getElementById('folder-import-ext-lnk')
+        if (lnk) lnk.checked = false
+      }
+    }
+
+    function onCancel() {
+      const params = window.arguments[0]
+
+      params.extensions = new Set
+      return true
+    }
+
+    function linkMode() {
+      return document.getElementById('folder-import-link-or-import').selectedItem === document.getElementById('folder-import-link')
+    }
+
+    function onAccept() {
+      const params = window.arguments[0]
+
+      params.link = linkMode()
+      params.extensions = new Set(selected())
+      return true
+    }
+  </script>
+
+  <vbox id="folder-import-extensions" flex="1" style="height:50em;overflow: auto;"/>
+
+  <radiogroup id="folder-import-link-or-import" onselect="selectionChanged()">
+    <radio id="folder-import-link" label="Link to files" value="link"/>
+    <radio id="folder-import-import" label="Store copy of files" value="store"/>
+  </radiogroup>
+
+</dialog>

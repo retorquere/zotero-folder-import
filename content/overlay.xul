@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://zotero-folder-import/skin/overlay.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero-folder-import/locale/zotero-folder-import.dtd">
+
+<overlay id="zotero-folder-import-overlay"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<!-- Include the main extension logic -->
+  <script src="chrome://zotero/content/include.js"/>
+  <script src="chrome://zotero-folder-import/content/webpack.js"/>
+  <script src="chrome://zotero-folder-import/content/FolderImport.js"/>
+</overlay>

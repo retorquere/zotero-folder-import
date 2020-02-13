@@ -1,0 +1,42 @@
+{
+  "name": "zotero-folder-import",
+  "version": "0.0.1",
+  "description": "Import folder of attachments into a collection hierarchy",
+  "scripts": {
+    "lint": "tslint -t stylish --project .",
+    "prebuild": "npm run lint",
+    "build": "webpack",
+    "postbuild": "zotero-plugin-zipup build zotero-folder-import",
+    "release": "zotero-plugin-release",
+    "postversion": "git push --follow-tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/retorquere/zotero-folder-import.git"
+  },
+  "author": {
+    "name": "Emiliano Heyns",
+    "email": "emiliano.heyns@iris-advies.com"
+  },
+  "bugs": {
+    "url": "https://github.com/retorquere/zotero-folder-import/issues"
+  },
+  "homepage": "https://github.com/retorquere/zotero-folder-import",
+  "dependencies": {
+    "circular-dependency-plugin": "^5.2.0",
+    "post-compile-webpack-plugin": "^0.1.2",
+    "rimraf": "^3.0.2",
+    "ts-loader": "^6.2.1",
+    "ts-node": "^8.6.2",
+    "tslint": "^6.0.0",
+    "typescript": "^3.7.5",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "zotero-plugin": "0.0.99"
+  },
+  "xpi": {
+    "name": "Folder Import for Zotero",
+    "updateLink": "https://github.com/retorquere/zotero-folder-import/releases/download/v{version}/zotero-auto-index-{version}.xpi",
+    "releaseURL": "https://github.com/retorquere/zotero-folder-import/releases/download/release/"
+  }
+}

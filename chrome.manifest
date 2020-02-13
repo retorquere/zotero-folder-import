@@ -1,0 +1,5 @@
+content	zotero-folder-import				content/
+locale	zotero-folder-import	en-US		locale/en-US/
+skin	zotero-folder-import	default		skin/
+
+overlay	chrome://zotero/content/zoteroPane.xul	chrome://zotero-folder-import/content/overlay.xul
