@@ -7,7 +7,7 @@
   onload="onLoad();"
   ondialogaccept="return onAccept();"
   ondialogcancel="return onCancel();"
-  buttonlabelextra1="&better-bibtex.bulk-keys-confirm.whatever;">
+  >
 
   <listbox id="folder-import-extensions" seltype="multiple" rows="30" width="400" onselect="selectionChanged()"/>
 
