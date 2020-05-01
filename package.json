@@ -8,7 +8,9 @@
     "build": "webpack",
     "postbuild": "zotero-plugin-zipup build zotero-folder-import",
     "release": "zotero-plugin-release",
-    "postversion": "git push --follow-tags"
+    "postversion": "git push --follow-tags",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -32,11 +34,13 @@
     "typescript": "^3.7.5",
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.11",
-    "zotero-plugin": "0.0.99"
+    "zotero-plugin": "0.0.99",
+    "snyk": "^1.316.1"
   },
   "xpi": {
     "name": "Folder Import for Zotero",
     "updateLink": "https://github.com/retorquere/zotero-folder-import/releases/download/v{version}/zotero-auto-index-{version}.xpi",
     "releaseURL": "https://github.com/retorquere/zotero-folder-import/releases/download/release/"
-  }
+  },
+  "snyk": true
 }
