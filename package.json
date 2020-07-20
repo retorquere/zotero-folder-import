@@ -26,13 +26,13 @@
     "circular-dependency-plugin": "^5.2.0",
     "post-compile-webpack-plugin": "^0.1.2",
     "rimraf": "^3.0.2",
-    "ts-loader": "^6.2.1",
-    "ts-node": "^8.6.2",
-    "tslint": "^6.0.0",
-    "typescript": "^3.7.5",
-    "webpack": "^4.41.6",
-    "webpack-cli": "^3.3.11",
-    "zotero-plugin": "0.0.99"
+    "ts-loader": "^8.0.1",
+    "ts-node": "^8.10.2",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.7",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "zotero-plugin": "1.0.23"
   },
   "xpi": {
     "name": "Folder Import for Zotero",
