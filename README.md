@@ -3,7 +3,7 @@ Folder Import
 
 Install by downloading the [latest version](https://github.com/retorquere/zotero-folder-import/releases/latest)
 
-Import folder of attachments into a collection hierarchy
+Import folder of attachments into a collection hierarchy. Click the green "+" button above the item list, and select "Add files from folder"
 
 # Support - read carefully
 
