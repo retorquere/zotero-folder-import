@@ -1,6 +1,6 @@
 {
   "name": "zotero-folder-import",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Import folder of attachments into a collection hierarchy",
   "scripts": {
     "lint": "tslint -t stylish --project .",
