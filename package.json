@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/retorquere/zotero-folder-import",
   "dependencies": {
-    "circular-dependency-plugin": "^5.2.0",
+    "circular-dependency-plugin": "^5.2.1",
     "post-compile-webpack-plugin": "^0.1.2",
     "rimraf": "^3.0.2",
     "ts-loader": "^8.0.4",
