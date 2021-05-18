@@ -3,12 +3,13 @@
   "version": "0.0.2",
   "description": "Import folder of attachments into a collection hierarchy",
   "scripts": {
-    "lint": "tslint -t stylish --project .",
+    "lint": "eslint . --ext .ts --cache --cache-location .eslintcache/",
     "prebuild": "npm run lint",
-    "build": "webpack",
+    "build": "tsc --noEmit && node esbuild.js",
     "postbuild": "zotero-plugin-zipup build zotero-folder-import",
     "release": "zotero-plugin-release",
     "postversion": "git push --follow-tags",
+    "start": "zotero-start",
     "ncu": "ncu -u && npm i && git add package.json package-lock.json && git commit -m ncu"
   },
   "repository": {
@@ -24,16 +25,11 @@
   },
   "homepage": "https://github.com/retorquere/zotero-folder-import",
   "dependencies": {
-    "circular-dependency-plugin": "^5.2.2",
-    "post-compile-webpack-plugin": "^0.1.2",
+    "esbuild": "^0.12.0",
     "rimraf": "^3.0.2",
-    "ts-loader": "^8.0.12",
     "ts-node": "^9.1.1",
-    "tslint": "^6.1.3",
-    "typescript": "^4.1.3",
-    "webpack": "^5.11.1",
-    "webpack-cli": "^4.3.0",
-    "zotero-plugin": "1.0.32"
+    "typescript": "^4.2.4",
+    "zotero-plugin": "1.0.51"
   },
   "xpi": {
     "name": "Folder Import for Zotero",

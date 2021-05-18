@@ -7,6 +7,13 @@
 	
 	<!-- Include the main extension logic -->
   <script src="chrome://zotero/content/include.js"/>
-  <script src="chrome://zotero-folder-import/content/webpack.js"/>
-  <script src="chrome://zotero-folder-import/content/FolderImport.js"/>
+  <script src="chrome://zotero-folder-import/content/zotero-folder-import.js"/>
+    <script>
+    var globals = Function('return this')();
+    (new Promise((resolve, reject) => { window.addEventListener('load', resolve) }))
+      .then(() => Zotero.debug('zotero-folder-import startup'))
+      .then(() => Zotero.FolderImport.load(globals))
+      .then(() => Zotero.debug('zotero-folder-import started'))
+      .catch(err => Zotero.debug(`starting zotero-folder-import, error: ${err.message}\n${err.stack ||''}`))
+  </script>
 </overlay>

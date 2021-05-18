@@ -3,13 +3,18 @@ declare const Components: any
 declare const ZoteroPane_Local: any
 declare const OS: any
 
-const marker = 'FolderImportMonkeyPatched'
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
 
+/*
+const marker = 'FolderImportMonkeyPatched'
 function patch(object, method, patcher) {
   if (object[method][marker]) return
   object[method] = patcher(object[method])
   object[method][marker] = true
 }
+*/
 
 function debug(msg) {
   Zotero.debug(`folder-import: ${msg}`)
@@ -33,8 +38,8 @@ class FilePicker { // minimal shim of Zotero FilePicker -- replace with actual p
     this.fp.init(parent, title, mode)
   }
 
-  public async show() {
-    return new Zotero.Promise(resolve => {
+  public show(): Promise<number> {
+    return new Zotero.Promise(resolve => { // eslint-disable-line @typescript-eslint/no-unsafe-return
       this.fp.open(userChoice => {
         switch (userChoice) {
           case Components.interfaces.nsIFilePicker.returnOK:
@@ -73,7 +78,8 @@ class FolderScanner {
       if (entry.isDir) {
         debug(`${this.path}: subdir ${JSON.stringify(entry.name)}`)
         this.folders.push(new FolderScanner(OS.Path.join(this.path, entry.name), false))
-      } else {
+      }
+      else {
         debug(`${this.path}: file ${JSON.stringify(entry.name)}`)
         debug(OS.Path.join(this.path, entry.name))
         this.files.push(OS.Path.join(this.path, entry.name))
@@ -90,31 +96,57 @@ class FolderScanner {
     debug(`scanned ${this.path}: ${JSON.stringify(Array.from(this.extensions))}`)
   }
 
+  public selected(extensions) {
+    let selected = this.files.filter(f => extensions.has(this.extension(f))).length
+    for (const folder of this.folders) {
+      selected += folder.selected(extensions)
+    }
+    return selected
+  }
+
   public async import(params, collection, pdfs) {
     // don't do anything if no selected extensions exist in this folder
     if (! [...this.extensions].find(ext => params.extensions.has(ext))) return
 
-    if (this.name) {
-      const parentKey = collection ? collection.key : undefined
-      collection = new Zotero.Collection
-      collection.libraryID = params.libraryID
-      collection.name = this.name
-      collection.parentKey = parentKey
-      await collection.saveTx()
-    }
+    debug(`importing path ${this.path}`)
 
-    for (const file of this.files) {
+    if (this.name) {
+      const existing = (collection ? collection.getChildCollections() : Zotero.Collections.getByLibrary(params.libraryID)).find(child => child.name === this.name)
+
+      if (existing) {
+        debug(`${this.name} exists under ${collection ? collection.name : 'the selected library'}`)
+        collection = existing
+      }
+      else {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands, prefer-template
+        debug(`${this.name} does not exist, creating${collection ? ' under ' + collection.name : ''}`)
+        const parentKey = collection ? collection.key : undefined
+        collection = new Zotero.Collection
+        collection.libraryID = params.libraryID
+        collection.name = this.name
+        collection.parentKey = parentKey
+        await collection.saveTx()
+        debug(`${this.name} created`)
+        await sleep(10) // eslint-disable-line @typescript-eslint/no-magic-numbers
+        debug(`${this.name} loaded`)
+      }
+    }
+    if (collection) await collection.loadAllData()
+
+    for (const file of this.files.sort()) {
       if (!params.extensions.has(this.extension(file))) continue
-      debug(`${this.path}: importing ${file}`)
 
       try {
         if (params.link) {
+          debug(`linking ${file} into ${collection ? collection.name : '<root>'}`)
           await Zotero.Attachments.linkFromFile({
             file,
             parentItemID: false,
             collections: collection ? [ collection.id ] : undefined,
           })
-        } else if (!file.endsWith('.lnk')) {
+        }
+        else if (!file.endsWith('.lnk')) {
+          debug(`importing ${file} into ${collection ? collection.name : '<root>'}`)
           const item = await Zotero.Attachments.importFromFile({
             file,
             libraryID: params.libraryID,
@@ -122,9 +154,13 @@ class FolderScanner {
           })
           if (file.toLowerCase().endsWith('.pdf')) pdfs.push(item)
         }
-      } catch (err) {
+      }
+      catch (err) {
         debug(err)
       }
+
+      await sleep(10) // eslint-disable-line @typescript-eslint/no-magic-numbers
+      params.progress.update()
     }
 
     for (const folder of this.folders) {
@@ -132,31 +168,29 @@ class FolderScanner {
     }
   }
 
-  private extension(path) {
+  private extension(path): false | string {
     const name = OS.Path.basename(path)
     if (name[0] === '.') return false
-    const parts = name.split('.')
+    const parts: string[] = name.split('.')
     return parts.length > 1 ? parts[parts.length - 1] : false
   }
 }
 
-const FolderImport = Zotero.FolderImport || new class { // tslint:disable-line:variable-name
-  private initialized: boolean = false
+class FolderImport {
+  private initialized = false
+  private status: { total: number, done: number }
+  private globals: Record<string, any> = {}
 
-  constructor() {
-    window.addEventListener('load', event => {
-      this.init().catch(err => Zotero.logError(err))
-    }, false)
-  }
+  private load(globals: Record<string, any>) {
+    this.globals = globals
 
-  private async init() {
-    if (!document.getElementById('zotero-tb-add-folder')) {
+    if (!this.globals.document.getElementById('zotero-tb-add-folder')) {
       // temporary hack because I can't overlay without an id
-      const toolbarbutton = document.getElementById('zotero-tb-add')
+      const toolbarbutton = this.globals.document.getElementById('zotero-tb-add')
       const menupopup = toolbarbutton.querySelector('menupopup')
       const menuseparators = Array.from(menupopup.querySelectorAll('menuseparator'))
       const menuseparator = menuseparators[menuseparators.length - 1]
-      const menuitem = document.createElement('menuitem')
+      const menuitem = this.globals.document.createElement('menuitem')
       menuitem.setAttribute('label', 'Add Files from Folder…')
       menuitem.setAttribute('tooltiptext', '')
       menuitem.setAttribute('id', 'zotero-tb-add-folder')
@@ -166,6 +200,17 @@ const FolderImport = Zotero.FolderImport || new class { // tslint:disable-line:v
 
     if (this.initialized) return
     this.initialized = true
+  }
+
+  public update() {
+    this.status.done += 1
+    const total = `${this.status.total}`
+    const done = `${this.status.done}`.padStart(total.length)
+    const msg = `Imported ${done}/${total}...`
+    debug(msg)
+    // const label = Zotero.getActiveZoteroPane().document.getElementById('zotero-pane-progress-label')
+    // if (label) label.value = msg
+    Zotero.updateZoteroPaneProgressMeter(Math.min((this.status.done * 100) / this.status.total, 100)) // eslint-disable-line @typescript-eslint/no-magic-numbers
   }
 
   public async addAttachmentsFromFolder() {
@@ -185,7 +230,7 @@ const FolderImport = Zotero.FolderImport || new class { // tslint:disable-line:v
     if (await fp.show() !== fp.returnOK) return
     debug(`dir picked: ${fp.file.path}`)
 
-    Zotero.showZoteroPaneProgressMeter('Scanning...')
+    Zotero.showZoteroPaneProgressMeter('Scanning for attachments...')
     const root = new FolderScanner(fp.file.path, true)
     await root.scan()
     Zotero.hideZoteroPaneOverlays()
@@ -197,19 +242,24 @@ const FolderImport = Zotero.FolderImport || new class { // tslint:disable-line:v
         link: !collectionTreeRow.isWithinGroup() && !collectionTreeRow.isPublications(),
         extensions: root.extensions,
         libraryID: collectionTreeRow.ref.libraryID,
+        progress: this,
       };
       // TODO: warn for .lnk files when params.link === false
       (window as any).openDialog('chrome://zotero-folder-import/content/import.xul', '', 'chrome,dialog,centerscreen,modal', params)
       if (params.extensions.size) {
         const pdfs = []
+        Zotero.showZoteroPaneProgressMeter('Importing attachments...', true)
+        this.status = { total: root.selected(params.extensions), done: 0 }
         await root.import(params, ZoteroPane_Local.getSelectedCollection(), pdfs)
-        if (pdfs.length) Zotero.RecognizePDF.autoRecognizeItems(pdfs)
+        Zotero.hideZoteroPaneOverlays()
+        if (pdfs.length) {
+          Zotero.showZoteroPaneProgressMeter('Fetching metadata for attachments...')
+          Zotero.RecognizePDF.autoRecognizeItems(pdfs)
+          Zotero.hideZoteroPaneOverlays()
+        }
       }
     }
   }
 }
 
-export = FolderImport
-
-// otherwise this entry point won't be reloaded: https://github.com/webpack/webpack/issues/156
-delete require.cache[module.id]
+Zotero.FolderImport = new FolderImport

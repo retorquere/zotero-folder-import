@@ -16,7 +16,7 @@
     <radio id="folder-import-import" label="Store copy of files" value="store"/>
   </radiogroup>
 
-  <script type="text/javascript">
+  <script type="text/javascript">//<![CDATA[
     let params, extensions, mode
 
     function onLoad() {
@@ -66,7 +66,7 @@
     }
 
     function linkMode() {
-      return mode.selectedItem === document.getElementById('folder-import-link')
+      return mode && (mode.selectedItem === document.getElementById('folder-import-link'))
     }
 
     function onAccept() {
@@ -74,5 +74,5 @@
       params.extensions = new Set(selected())
       return true
     }
-  </script>
+  //]]></script>
 </dialog>
