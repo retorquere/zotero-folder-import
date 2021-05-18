@@ -5,14 +5,14 @@ specifiers:
   rimraf: ^3.0.2
   ts-node: ^9.1.1
   typescript: ^4.2.4
-  zotero-plugin: 1.0.51
+  zotero-plugin: 1.0.52
 
 dependencies:
   esbuild: 0.12.0
   rimraf: 3.0.2
   ts-node: 9.1.1_typescript@4.2.4
   typescript: 4.2.4
-  zotero-plugin: 1.0.51
+  zotero-plugin: 1.0.52
 
 packages:
 
@@ -2455,8 +2455,8 @@ packages:
       readable-stream: 3.6.0
     dev: false
 
-  /zotero-plugin/1.0.51:
-    resolution: {integrity: sha512-9Qy7VImpi5qyOOU3krmXzVpWD+xHfFl9mX5Q7VSW2oY6DiS2vWnFMF4dAkaEB4Q4zrzqcwCozK7waMsE7F/0VQ==}
+  /zotero-plugin/1.0.52:
+    resolution: {integrity: sha512-ClvOP5xWxbvY689OnwG6MHbNZF/43hin96Cz/9PZ3Q9ZgHW4g7L12qovgmboZf8X/hKXLoFpNl6t5HWhbH2NRg==}
     hasBin: true
     dependencies:
       '@octokit/rest': 18.5.3
