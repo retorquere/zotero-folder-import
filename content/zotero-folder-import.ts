@@ -1,9 +1,23 @@
 declare const Zotero: any
 declare const Components: any
 declare const ZoteroPane_Local: any
-declare const OS: any
 
-function sleep(ms) {
+type DirectoryEntry = {
+  isDir: boolean
+  name: string
+}
+
+declare const OS: {
+  Path: {
+    basename: (path: string) => string
+    join: (path: string, name: string) => string
+  }
+  File:  {
+    DirectoryIterator: (path: string) => void // Iterable<DirectoryEntry>
+  }
+}
+
+function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
@@ -65,7 +79,7 @@ class FolderScanner {
   path: string
   name: string
 
-  constructor(path, isRoot) {
+  constructor(path: string, isRoot: boolean) {
     debug(`scanning ${path}`)
     this.path = path
     this.name = isRoot ? '' : OS.Path.basename(path)
@@ -73,8 +87,7 @@ class FolderScanner {
 
   public async scan() {
     const iterator = new OS.File.DirectoryIterator(this.path)
-    await iterator.forEach(entry => {
-      debug(`entry: ${JSON.stringify(Object.keys(entry))} ${JSON.stringify(entry)}`)
+    await iterator.forEach((entry: DirectoryEntry) => {
       if (entry.isDir) {
         debug(`${this.path}: subdir ${JSON.stringify(entry.name)}`)
         this.folders.push(new FolderScanner(OS.Path.join(this.path, entry.name), false))
@@ -84,7 +97,7 @@ class FolderScanner {
         debug(OS.Path.join(this.path, entry.name))
         this.files.push(OS.Path.join(this.path, entry.name))
         const ext = this.extension(entry.name)
-        if (ext) this.extensions.add(ext.toLowerCase())
+        if (ext) this.extensions.add(ext)
       }
     })
     iterator.close()
@@ -168,11 +181,11 @@ class FolderScanner {
     }
   }
 
-  private extension(path): false | string {
-    const name = OS.Path.basename(path)
+  private extension(path: string): false | string {
+    const name: string = OS.Path.basename(path)
     if (name[0] === '.') return false
     const parts: string[] = name.split('.')
-    return parts.length > 1 ? parts[parts.length - 1] : false
+    return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : false
   }
 }
 
@@ -188,8 +201,7 @@ class FolderImport {
       // temporary hack because I can't overlay without an id
       const toolbarbutton = this.globals.document.getElementById('zotero-tb-add')
       const menupopup = toolbarbutton.querySelector('menupopup')
-      const menuseparators = Array.from(menupopup.querySelectorAll('menuseparator'))
-      const menuseparator = menuseparators[menuseparators.length - 1]
+      const menuseparator = menupopup.querySelector('menuseparator:last-child')
       const menuitem = this.globals.document.createElement('menuitem')
       menuitem.setAttribute('label', 'Add Files from Folder…')
       menuitem.setAttribute('tooltiptext', '')
@@ -226,12 +238,12 @@ class FolderImport {
     }
 
     const fp = new FilePicker()
-    fp.init(window, Zotero.getString('pane.item.attachments.select'), fp.modeGetFolder)
+    fp.init(window, Zotero.getString('pane.item.attachments.select') as string, fp.modeGetFolder)
     if (await fp.show() !== fp.returnOK) return
     debug(`dir picked: ${fp.file.path}`)
 
     Zotero.showZoteroPaneProgressMeter('Scanning for attachments...')
-    const root = new FolderScanner(fp.file.path, true)
+    const root = new FolderScanner(fp.file.path as string, true)
     await root.scan()
     Zotero.hideZoteroPaneOverlays()
 
