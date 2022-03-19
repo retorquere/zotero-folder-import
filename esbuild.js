@@ -1,10 +1,12 @@
 const esbuild = require('esbuild')
+const rmrf = require('rimraf')
 
 require('zotero-plugin/copy-assets')
 require('zotero-plugin/rdf')
 require('zotero-plugin/version')
 
 async function build() {
+  rmrf.sync('gen')
   await esbuild.build({
     bundle: true,
     format: 'iife',
