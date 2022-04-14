@@ -29,7 +29,7 @@
     "rimraf": "^3.0.2",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.2",
-    "zotero-plugin": "1.2.3"
+    "zotero-plugin": "1.4.0"
   },
   "xpi": {
     "name": "Folder Import for Zotero",
