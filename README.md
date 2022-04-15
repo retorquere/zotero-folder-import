@@ -1,7 +1,13 @@
 Folder Import
 =================
 
-Install by downloading the [latest version](https://github.com/retorquere/zotero-folder-import/releases/latest)
+Install by downloading the [latest version](https://github.com/retorquere/zotero-folder-import/releases/latest).
+
+You can use the .xpi file from the link above to install in the Zotero standalone app: 
+* Open the Zotero "Tools" menu
+* Select "Add-ons"
+* Open the gear menu in the top right
+* Select "Install Add-on From File..." .
 
 Import folder of attachments into a collection hierarchy. Click the green "+" button above the item list, and select "Add files from folder"
 
