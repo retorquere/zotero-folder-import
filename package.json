@@ -25,11 +25,11 @@
   },
   "homepage": "https://github.com/retorquere/zotero-folder-import",
   "dependencies": {
-    "esbuild": "^0.14.27",
+    "esbuild": "^0.14.43",
     "rimraf": "^3.0.2",
-    "ts-node": "^10.7.0",
-    "typescript": "^4.6.2",
-    "zotero-plugin": "1.2.3"
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3",
+    "zotero-plugin": "1.4.3"
   },
   "xpi": {
     "name": "Folder Import for Zotero",

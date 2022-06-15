@@ -6,7 +6,6 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<!-- Include the main extension logic -->
-  <script src="chrome://zotero/content/include.js"/>
   <script src="chrome://zotero-folder-import/content/zotero-folder-import.js"/>
     <script>
     var globals = Function('return this')();
