@@ -5,7 +5,8 @@
   "scripts": {
     "lint": "eslint . --ext .ts --cache --cache-location .eslintcache/",
     "prebuild": "npm run lint",
-    "build": "tsc --noEmit && node esbuild.js",
+    "nobuild": "tsc --noEmit && node esbuild.js",
+    "build": "node setup.js && tsc",
     "postbuild": "zotero-plugin-zipup build zotero-folder-import",
     "release": "zotero-plugin-release",
     "postversion": "git push --follow-tags",
@@ -24,7 +25,7 @@
     "url": "https://github.com/retorquere/zotero-folder-import/issues"
   },
   "homepage": "https://github.com/retorquere/zotero-folder-import",
-  "dependencies": {
+  "devDependencies": {
     "esbuild": "^0.14.43",
     "rimraf": "^3.0.2",
     "ts-node": "^10.8.1",

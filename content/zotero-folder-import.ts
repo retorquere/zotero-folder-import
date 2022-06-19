@@ -1,4 +1,4 @@
-declare const Zotero: any
+declare var Zotero: any // eslint-disable-line no-var
 declare const Components: any
 declare const ZoteroPane_Local: any
 
@@ -97,7 +97,7 @@ class FolderScanner {
         debug(OS.Path.join(this.path, entry.name))
         this.files.push(OS.Path.join(this.path, entry.name))
         const ext = this.extension(entry.name)
-        if (ext) this.extensions.add(ext)
+        if (ext && ext !== 'lnk') this.extensions.add(ext)
       }
     })
     iterator.close()
@@ -257,7 +257,8 @@ class FolderImport {
         progress: this,
       };
       // TODO: warn for .lnk files when params.link === false
-      (window as any).openDialog('chrome://zotero-folder-import/content/import.xul', '', 'chrome,dialog,centerscreen,modal', params)
+      (window as any).openDialog('chrome://zotero-folder-import/content/bulkimport.xul', '', 'chrome,dialog,centerscreen,modal', params)
+      Zotero.debug('selected:', Array.from(params.extensions))
       if (params.extensions.size) {
         const pdfs = []
         Zotero.showZoteroPaneProgressMeter('Importing attachments...', true)

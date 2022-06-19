@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://zotero-better-bibtex/locale/zotero-better-bibtex.dtd">
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-folder-import/skin/overlay.css" type="text/css"?>
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  title="Add Files from Folder…"
+  buttons="accept,cancel"
+  onload="onLoad();"
+  ondialogaccept="return onAccept();"
+  ondialogcancel="return onCancel();"
+  >
+
+  <tree id="folder-import-extensions" flex="1" rows="10" editable="true">
+
+    <treecols>
+      <treecol id="selected" label="Import" type="checkbox" editable="true"/>
+      <treecol id="subject" label="Extension" flex="2"/>
+    </treecols>
+
+    <treechildren id="folder-import-extensions-rows">
+    </treechildren>
+
+  </tree>
+
+  <radiogroup id="folder-import-link-or-import">
+    <radio id="folder-import-link" label="Link to files" value="link"/>
+    <radio id="folder-import-import" label="Store copy of files" value="store"/>
+  </radiogroup>
+
+  <script src="chrome://zotero/content/include.js"/>
+  <script src="chrome://zotero-folder-import/content/bulkimport.js"/>
+</dialog>
