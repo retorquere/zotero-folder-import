@@ -1,3 +1,6 @@
+Components.utils.import('resource://gre/modules/FileUtils.jsm')
+declare const FileUtils: any
+
 declare var Zotero: any // eslint-disable-line no-var
 declare const Components: any
 declare const ZoteroPane_Local: any
@@ -14,6 +17,8 @@ declare const OS: {
   }
   File:  {
     DirectoryIterator: (path: string) => void // Iterable<DirectoryEntry>
+    remove: (path: string) => Promise<void>
+    exists: (path: string) => Promise<boolean>
   }
 }
 
@@ -117,7 +122,7 @@ class FolderScanner {
     return selected
   }
 
-  public async import(params, collection, pdfs) {
+  public async import(params, collection, pdfs, duplicates: Set<string>) {
     // don't do anything if no selected extensions exist in this folder
     if (! [...this.extensions].find(ext => params.extensions.has(ext))) return
 
@@ -148,6 +153,7 @@ class FolderScanner {
 
     for (const file of this.files.sort()) {
       if (!params.extensions.has(this.extension(file))) continue
+      if (duplicates.has(file)) continue
 
       try {
         if (params.link) {
@@ -177,7 +183,7 @@ class FolderScanner {
     }
 
     for (const folder of this.folders) {
-      await folder.import(params, collection, pdfs)
+      await folder.import(params, collection, pdfs, duplicates)
     }
   }
 
@@ -225,6 +231,54 @@ class FolderImport {
     Zotero.updateZoteroPaneProgressMeter(Math.min((this.status.done * 100) / this.status.total, 100)) // eslint-disable-line @typescript-eslint/no-magic-numbers
   }
 
+  private async duplicates(path: string): Promise<string[]> {
+    const rmlint: string = Zotero.Prefs.get('extensions.folder-import.rmlint')
+    if (!rmlint) return []
+    if (!await OS.File.exists(rmlint)) return []
+
+    const duplicates: string = OS.Path.join(Zotero.getTempDirectory().path as string, `rmlint${Zotero.Utilities.randomString()}.json`)
+
+    try {
+      const cmd = new FileUtils.File(rmlint)
+      if (!cmd.isExecutable()) return []
+
+      const proc = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess)
+      proc.init(cmd)
+      proc.startHidden = true
+      const args = ['-o', `json:${duplicates}`, '-T', 'df', Zotero.getStorageDirectory(), path]
+      await new Promise((resolve, reject) => {
+        proc.runwAsync(args, args.length, {
+          observe: (subject, topic) => {
+            if (topic !== 'process-finished') {
+              reject(new Error(`failed: ${rmlint} ${args}`))
+            }
+            else if (proc.exitValue > 0) {
+              reject(new Error(`failed with exit status ${proc.exitValue}: ${rmlint} ${args}`))
+            }
+            else {
+              resolve(true)
+            }
+          },
+        })
+      })
+
+      return JSON.parse(Zotero.File.getContents(duplicates) as string)
+        .filter((d: any) => d.type === 'duplicate_file')
+        .map((d: any) => d.path as string) as string []
+    }
+    catch (err) {
+      debug(`duplicates: ${err}`)
+      return []
+    }
+    finally {
+      try {
+        await OS.File.remove(duplicates)
+      }
+      catch (err) {
+      }
+    }
+  }
+
   public async addAttachmentsFromFolder() {
     await Zotero.Schema.schemaUpdatePromise
 
@@ -260,10 +314,11 @@ class FolderImport {
       (window as any).openDialog('chrome://zotero-folder-import/content/bulkimport.xul', '', 'chrome,dialog,centerscreen,modal', params)
       Zotero.debug('selected:', Array.from(params.extensions))
       if (params.extensions.size) {
+
         const pdfs = []
         Zotero.showZoteroPaneProgressMeter('Importing attachments...', true)
         this.status = { total: root.selected(params.extensions), done: 0 }
-        await root.import(params, ZoteroPane_Local.getSelectedCollection(), pdfs)
+        await root.import(params, ZoteroPane_Local.getSelectedCollection(), pdfs, new Set(await this.duplicates(fp.file.path as string)))
         Zotero.hideZoteroPaneOverlays()
         if (pdfs.length) {
           Zotero.showZoteroPaneProgressMeter('Fetching metadata for attachments...')
