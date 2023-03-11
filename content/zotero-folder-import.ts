@@ -158,11 +158,12 @@ class FolderScanner {
       try {
         if (params.link) {
           debug(`linking ${file} into ${collection ? collection.name : '<root>'}`)
-          await Zotero.Attachments.linkFromFile({
+          const item = await Zotero.Attachments.linkFromFile({
             file,
             parentItemID: false,
             collections: collection ? [ collection.id ] : undefined,
           })
+          if (file.toLowerCase().endsWith('.pdf')) pdfs.push(item)
         }
         else if (!file.endsWith('.lnk')) {
           debug(`importing ${file} into ${collection ? collection.name : '<root>'}`)
