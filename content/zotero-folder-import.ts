@@ -154,8 +154,14 @@ class FolderScanner {
     if (collection) await collection.loadAllData()
 
     for (const file of this.files.sort()) {
-      if (!params.extensions.has(this.extension(file))) continue
-      if (duplicates.has(file)) continue
+      if (!params.extensions.has(this.extension(file))) {
+        debug(`not importing ${file} with extension ${this.extension(file)}`)
+        continue
+      }
+      if (duplicates.has(file)) {
+        debug(`not importing duplicate ${file}`)
+        continue
+      }
 
       try {
         if (params.link) {
@@ -167,7 +173,10 @@ class FolderScanner {
           })
           if (file.toLowerCase().endsWith('.pdf')) pdfs.push(item)
         }
-        else if (!file.endsWith('.lnk')) {
+        else if (file.endsWith('.lnk')) {
+          debug(`not importing ${file} with extension ${this.extension(file)}`)
+        }
+        else {
           debug(`importing ${file} into ${collection ? collection.name : '<root>'}`)
           const item = await Zotero.Attachments.importFromFile({
             file,
