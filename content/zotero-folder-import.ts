@@ -5,6 +5,8 @@ declare var Zotero: any // eslint-disable-line no-var
 declare const Components: any
 declare const ZoteroPane_Local: any
 
+import { DebugLog as DebugLogSender } from 'zotero-plugin/debug-log'
+
 type DirectoryEntry = {
   isDir: boolean
   name: string
@@ -203,6 +205,8 @@ class FolderImport {
 
   private load(globals: Record<string, any>) {
     this.globals = globals
+
+    DebugLogSender.register('Folder import', [])
 
     if (!this.globals.document.getElementById('zotero-tb-add-folder')) {
       // temporary hack because I can't overlay without an id
