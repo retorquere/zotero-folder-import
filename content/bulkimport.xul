@@ -2,7 +2,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero-better-bibtex/locale/zotero-better-bibtex.dtd">
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-folder-import/skin/overlay.css" type="text/css"?>
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml"
   title="Add Files from Folder…"
   buttons="accept,cancel"
   onload="onLoad();"
@@ -10,17 +10,29 @@
   ondialogcancel="return onCancel();"
   >
 
-  <tree id="folder-import-extensions" flex="1" rows="10" editable="true">
+  <html:select multiple="multiple" size="10" id="folder-import-extensions">
+  </html:select>
+  <script>
+    //<![CDATA[
+    function toggle(event, option) {
+      if (option.getAttribute('selected')) {
+        option.removeAttribute('selected')
+        option.selected = false
+      }
+      else {
+        option.setAttribute('selected', 'selected')
+        option.selected = true
+      }
+      event.preventDefault()
+    }
 
-    <treecols>
-      <treecol id="selected" label="Import" type="checkbox" editable="true"/>
-      <treecol id="subject" label="Extension" flex="2"/>
-    </treecols>
-
-    <treechildren id="folder-import-extensions-rows">
-    </treechildren>
-
-  </tree>
+    const select = document.getElementById('folder-import-extensions')
+    select.addEventListener('mousedown', event => toggle(event, event.target))
+    select.addEventListener('keydown', event => {
+      if (select.selectedIndex >= 0 && event.keyCode === 32) toggle(event, select.options[select.selectedIndex])
+    })
+    //]]>
+  </script>
 
   <radiogroup id="folder-import-link-or-import">
     <radio id="folder-import-link" label="Link to files" value="link"/>
