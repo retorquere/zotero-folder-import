@@ -15,6 +15,7 @@ type DirectoryEntry = {
 declare const OS: {
   Path: {
     basename: (path: string) => string
+    dirname: (path: string) => string
     join: (path: string, name: string) => string
   }
   File:  {
@@ -247,6 +248,7 @@ class FolderImport {
 
   private async duplicates(path: string): Promise<string[]> {
     const rmlint: string = Zotero.Prefs.get('extensions.folder-import.rmlint')
+    const scanLinked: string = Zotero.Prefs.get('extensions.folder-import.rmlint.linked')
     if (!rmlint) return []
     if (!await OS.File.exists(rmlint)) return []
 
@@ -256,10 +258,17 @@ class FolderImport {
       const cmd = new FileUtils.File(rmlint)
       if (!cmd.isExecutable()) return []
 
+      const linked: Set<string> = new Set
+      if (scanLinked) {
+        for (const att of await Zotero.DB.queryAsync('SELECT DISTINCT path FROM itemAttachments WHERE linkMode=?', [Zotero.Attachments.LINK_MODE_LINKED_FILE])) {
+          linked.add(OS.Path.dirname(att.path as string))
+        }
+      }
+
       const proc = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess)
       proc.init(cmd)
       proc.startHidden = true
-      const args = ['-o', `json:${duplicates}`, '-T', 'df', Zotero.getStorageDirectory(), path]
+      const args = ['-o', `json:${duplicates}`, '-T', 'df', Zotero.getStorageDirectory(), path].concat([...linked])
       await new Promise((resolve, reject) => {
         proc.runwAsync(args, args.length, {
           observe: (subject, topic) => {
