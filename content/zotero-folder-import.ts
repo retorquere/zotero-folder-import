@@ -259,9 +259,11 @@ class FolderImport {
       if (!cmd.isExecutable()) return []
 
       const linked: Set<string> = new Set
+      const baseAttachmentPath: string = Zotero.Prefs.get('baseAttachmentPath')
+      if (baseAttachmentPath) linked.add(baseAttachmentPath)
       if (scanLinked) {
         for (const att of await Zotero.DB.queryAsync('SELECT DISTINCT path FROM itemAttachments WHERE linkMode=?', [Zotero.Attachments.LINK_MODE_LINKED_FILE])) {
-          linked.add(OS.Path.dirname(att.path as string))
+          if (att.path && !att.path.startsWith(Zotero.Attachments.BASE_PATH_PLACEHOLDER)) linked.add(OS.Path.dirname(att.path as string))
         }
       }
 
