@@ -248,7 +248,7 @@ class FolderImport {
 
   private async duplicates(path: string): Promise<string[]> {
     const rmlint: string = Zotero.Prefs.get('extensions.folder-import.rmlint')
-    const scanLinked: string = Zotero.Prefs.get('extensions.folder-import.rmlint.linked')
+    const scanLinked: boolean = Zotero.Prefs.get('extensions.folder-import.rmlint.linked')
     if (!rmlint) return []
     if (!await OS.File.exists(rmlint)) return []
 
@@ -267,6 +267,7 @@ class FolderImport {
         }
       }
 
+      Zotero.debug(`Folder import: scanning for duplicates in ${JSON.stringify([...linked])}`)
       const proc = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess)
       proc.init(cmd)
       proc.startHidden = true
