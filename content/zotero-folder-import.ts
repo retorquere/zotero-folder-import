@@ -188,7 +188,7 @@ class FolderScanner {
         }
       }
       catch (err) {
-        debug(err)
+        debug(`${err}`)
       }
 
       await sleep(10) // eslint-disable-line @typescript-eslint/no-magic-numbers
@@ -267,7 +267,7 @@ class FolderImport {
         }
       }
 
-      Zotero.debug(`Folder import: scanning for duplicates in ${JSON.stringify([...linked])}`)
+      debug(`scanning for duplicates in ${JSON.stringify([...linked])}`)
       const proc = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess)
       proc.init(cmd)
       proc.startHidden = true
@@ -338,7 +338,7 @@ class FolderImport {
       };
       // TODO: warn for .lnk files when params.link === false
       (window as any).openDialog('chrome://zotero-folder-import/content/bulkimport.xul', '', 'chrome,dialog,centerscreen,modal', params)
-      Zotero.debug('selected:', Array.from(params.extensions))
+      debug(`selected: ${JSON.stringify(Array.from(params.extensions))}`)
       if (params.extensions.size) {
 
         const pdfs = []
