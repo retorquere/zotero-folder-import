@@ -315,6 +315,8 @@ class FolderImport {
     await root.scan()
     Zotero.hideZoteroPaneOverlays()
 
+    Zotero.Translators.getAllForType('import')
+
     debug(`scan complete: ${JSON.stringify(Array.from(root.extensions))} (${root.extensions.size})`)
     if (root.extensions.size) {
       const collectionTreeRow = ZoteroPane_Local.getCollectionTreeRow()

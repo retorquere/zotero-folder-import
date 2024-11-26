@@ -38,6 +38,7 @@
     <radio id="folder-import-link" label="Link to files" value="link"/>
     <radio id="folder-import-import" label="Store copy of files" value="store"/>
   </radiogroup>
+  <checkbox id="item-import" label="Import items"/>
 
   <script src="chrome://zotero/content/include.js"/>
   <script src="chrome://zotero-folder-import/content/bulkimport.js"/>
