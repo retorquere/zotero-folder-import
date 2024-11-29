@@ -1,15 +1,15 @@
-import { debug } from './content/debug'
+import { log } from './content/debug'
 
 export function install() {
-  debug('installed')
+  log.info('installed')
 }
 export function uninstall() {
-  debug('uninstalled')
+  log.info('uninstalled')
 }
 
 let chromeHandle
 export async function startup({ id, version, rootURI }) {
-  debug('startup', id, version)
+  log.info('startup', id, version)
 
   const aomStartup = Components.classes['@mozilla.org/addons/addon-manager-startup;1'].getService(Components.interfaces.amIAddonManagerStartup)
   const manifestURI = Services.io.newURI(`${rootURI}manifest.json`)
@@ -20,10 +20,11 @@ export async function startup({ id, version, rootURI }) {
 
   Services.scriptloader.loadSubScript(rootURI + 'folder-import.js', { rootURI, Zotero })
   await Zotero.FolderImport.startup()
+  log.info('startup', id, version, 'ready')
 }
 
 export async function shutdown() {
-  debug('shutdown')
+  log.info('shutdown')
   await Zotero.FolderImport.shutdown()
   if (chromeHandle) {
     chromeHandle.destruct()
@@ -33,12 +34,12 @@ export async function shutdown() {
 }
 
 export function onMainWindowLoad({ window }) {
-  debug('onMainWindowLoad')
+  log.info('onMainWindowLoad')
   window.MozXULElement.insertFTLIfNeeded('folder-import.ftl')
   Zotero.FolderImport?.onMainWindowLoad(window)
 }
 
 export function onMainWindowUnload({ window }) {
-  debug('onMainWindowUnload')
+  log.info('onMainWindowUnload')
   Zotero.FolderImport?.onMainWindowUnload(window)
 }

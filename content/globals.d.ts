@@ -4,6 +4,8 @@ declare var FolderImport: $FolderImport // eslint-disable-line no-var
 declare const Zotero: { FolderImport: $FolderImport } & Omit<Record<string, any>, 'FolderImport'>
 declare const AddonManager: any
 declare const Components: any
+declare const PathUtils: any
+declare const IOUtils: any
 declare const Services: any
 declare const Localization: any
 declare const rootURI: string
