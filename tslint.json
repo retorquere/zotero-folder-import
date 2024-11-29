@@ -1,7 +1,0 @@
-{
-  "extends": "zotero-plugin/tslint.json",
-  "rules": {
-    "member-ordering": false,
-    "max-classes-per-file": false
-  }
-}

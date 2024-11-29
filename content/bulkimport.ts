@@ -29,7 +29,7 @@ function onLoad() { // eslint-disable-line @typescript-eslint/no-unused-vars
   }
 
   extensions = Array.from(params.extensions).sort().filter((ext: string) => ext !== 'lnk')
-  const defaults = [ 'pdf', 'docx', 'html', 'odt' ].filter(ext => extensions.includes(ext))
+  const defaults = ['pdf', 'docx', 'html', 'odt'].filter(ext => extensions.includes(ext))
   extensions = defaults.concat(extensions.filter(ext => !defaults.includes(ext)))
 
   for (const ext of extensions) {
@@ -45,7 +45,7 @@ function onLoad() { // eslint-disable-line @typescript-eslint/no-unused-vars
 }
 
 function onCancel() { // eslint-disable-line @typescript-eslint/no-unused-vars
-  params.extensions = new Set
+  params.extensions = new Set()
   return true
 }
 

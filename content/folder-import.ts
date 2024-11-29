@@ -12,12 +12,17 @@ type DirectoryEntry = {
   name: string
 }
 
+const NS = {
+  XUL: 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul',
+  XHTML: 'http://www.w3.org/1999/xhtml',
+}
+
 declare const OS: {
   Path: {
     basename: (path: string) => string
     join: (path: string, name: string) => string
   }
-  File:  {
+  File: {
     DirectoryIterator: (path: string) => void // Iterable<DirectoryEntry>
     remove: (path: string) => Promise<void>
     exists: (path: string) => Promise<boolean>
@@ -27,15 +32,6 @@ declare const OS: {
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
-
-/*
-const marker = 'FolderImportMonkeyPatched'
-function patch(object, method, patcher) {
-  if (object[method][marker]) return
-  object[method] = patcher(object[method])
-  object[method][marker] = true
-}
-*/
 
 function debug(msg) {
   Zotero.debug(`folder-import: ${msg}`)
@@ -81,7 +77,7 @@ class FilePicker { // minimal shim of Zotero FilePicker -- replace with actual p
 class FolderScanner {
   files: string[] = []
   folders: FolderScanner[] = []
-  extensions: Set<string> = new Set
+  extensions: Set<string> = new Set()
 
   path: string
   name: string
@@ -126,7 +122,7 @@ class FolderScanner {
 
   public async import(params, collection, pdfs, duplicates: Set<string>) {
     // don't do anything if no selected extensions exist in this folder
-    if (! [...this.extensions].find(ext => params.extensions.has(ext))) return
+    if (![...this.extensions].find(ext => params.extensions.has(ext))) return
 
     debug(`importing path ${this.path}`)
 
@@ -141,7 +137,7 @@ class FolderScanner {
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands, prefer-template
         debug(`${this.name} does not exist, creating${collection ? ' under ' + collection.name : ''}`)
         const parentKey = collection ? collection.key : undefined
-        collection = new Zotero.Collection
+        collection = new Zotero.Collection()
         collection.libraryID = params.libraryID
         collection.name = this.name
         collection.parentKey = parentKey
@@ -169,7 +165,7 @@ class FolderScanner {
           const item = await Zotero.Attachments.linkFromFile({
             file,
             parentItemID: false,
-            collections: collection ? [ collection.id ] : undefined,
+            collections: collection ? [collection.id] : undefined,
           })
           if (file.toLowerCase().endsWith('.pdf')) pdfs.push(item)
         }
@@ -181,7 +177,7 @@ class FolderScanner {
           const item = await Zotero.Attachments.importFromFile({
             file,
             libraryID: params.libraryID,
-            collections: collection ? [ collection.id ] : undefined,
+            collections: collection ? [collection.id] : undefined,
           })
           if (file.toLowerCase().endsWith('.pdf')) pdfs.push(item)
         }
@@ -207,31 +203,40 @@ class FolderScanner {
   }
 }
 
-class FolderImport {
+export class $FolderImport {
   private initialized = false
-  private status: { total: number, done: number }
-  private globals: Record<string, any> = {}
+  private status: { total: number; done: number }
 
-  private load(globals: Record<string, any>) {
-    this.globals = globals
-
+  public async startup() {
+    await Zotero.initializationPromise
     DebugLogSender.register('Folder import', [])
+  }
 
-    if (!this.globals.document.getElementById('zotero-tb-add-folder')) {
+  public async shutdown() {
+    for (const win of Zotero.getMainWindows()) {
+      if (win.ZoteroPane) this.onMainWindowUnload(win)
+    }
+  }
+
+  public onMainWindowLoad(win: Window & { MozXULElement: any }) {
+    const doc: Document & { createXULElement: any } = win.document as any
+    if (!doc.getElementById('zotero-tb-add-folder')) {
       // temporary hack because I can't overlay without an id
-      const toolbarbutton = this.globals.document.getElementById('zotero-tb-add')
+      const toolbarbutton = doc.getElementById('zotero-tb-add')
       const menupopup = toolbarbutton.querySelector('menupopup')
       const menuseparator = menupopup.querySelector('menuseparator:last-child')
-      const menuitem = this.globals.document.createElement('menuitem')
+      const menuitem = doc.createElementNS(NS.XUL, 'menuitem')
       menuitem.setAttribute('label', 'Add Files from Folder…')
       menuitem.setAttribute('tooltiptext', '')
       menuitem.setAttribute('id', 'zotero-tb-add-folder')
       menuitem.addEventListener('command', this.addAttachmentsFromFolder.bind(this), false)
       menupopup.insertBefore(menuitem, menuseparator)
     }
+  }
 
-    if (this.initialized) return
-    this.initialized = true
+  public onMainWindowUnload(win: Window) {
+    const doc: { createXULElement: any } = win.document as any
+    win.document.getElementById('zotero-tb-add-folder')?.remove()
   }
 
   public update() {
@@ -278,7 +283,7 @@ class FolderImport {
 
       return JSON.parse(Zotero.File.getContents(duplicates) as string)
         .filter((d: any) => d.type === 'duplicate_file')
-        .map((d: any) => d.path as string) as string []
+        .map((d: any) => d.path as string) as string[]
     }
     catch (err) {
       debug(`duplicates: ${err}`)
@@ -325,12 +330,10 @@ class FolderImport {
         extensions: root.extensions,
         libraryID: collectionTreeRow.ref.libraryID,
         progress: this,
-      };
-      // TODO: warn for .lnk files when params.link === false
-      (window as any).openDialog('chrome://zotero-folder-import/content/bulkimport.xul', '', 'chrome,dialog,centerscreen,modal', params)
+      } // TODO: warn for .lnk files when params.link === false
+      ;(window as any).openDialog('chrome://zotero-folder-import/content/bulkimport.xul', '', 'chrome,dialog,centerscreen,modal', params)
       Zotero.debug('selected:', Array.from(params.extensions))
       if (params.extensions.size) {
-
         const pdfs = []
         Zotero.showZoteroPaneProgressMeter('Importing attachments...', true)
         this.status = { total: root.selected(params.extensions), done: 0 }
@@ -346,4 +349,4 @@ class FolderImport {
   }
 }
 
-Zotero.FolderImport = new FolderImport
+export var FolderImport = Zotero.FolderImport = new $FolderImport()

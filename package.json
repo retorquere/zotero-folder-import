@@ -3,14 +3,14 @@
   "version": "0.0.7",
   "description": "Import folder of attachments into a collection hierarchy",
   "scripts": {
-    "lint": "eslint . --ext .ts --cache --cache-location .eslintcache/",
+    "lint": "dprint fmt bootstrap.ts content/*.ts && dprint check bootstrap.ts content/*.ts",
     "prebuild": "npm run lint",
-    "build": "node setup.js && tsc --noEmit && node esbuild.js",
+    "build": "rm -rf build && tsc --noEmit && node esbuild.js",
     "postbuild": "zotero-plugin-zipup build zotero-folder-import",
     "release": "zotero-plugin-release",
     "postversion": "git push --follow-tags",
     "start": "zotero-start",
-    "ncu": "ncu -x '*eslint*' -u && npm i && git add package.json package-lock.json && git commit -m ncu"
+    "ncu": "ncu -u && npm i && git add package.json package-lock.json && git commit -m ncu"
   },
   "repository": {
     "type": "git",
@@ -35,5 +35,8 @@
     "name": "Folder Import for Zotero",
     "updateLink": "https://github.com/retorquere/zotero-folder-import/releases/download/v{version}/zotero-auto-index-{version}.xpi",
     "releaseURL": "https://github.com/retorquere/zotero-folder-import/releases/download/release/"
+  },
+  "dependencies": {
+    "dprint": "^0.47.5"
   }
 }
