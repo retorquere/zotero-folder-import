@@ -1,5 +1,3 @@
-// declare var Zotero: any // eslint-disable-line no-var
-
 type XULElement = HTMLElement & {
   selectedItem?: HTMLElement
   columns?: any
@@ -20,7 +18,7 @@ let params: {
 
 const html = 'http://www.w3.org/1999/xhtml'
 
-function onLoad() { // eslint-disable-line @typescript-eslint/no-unused-vars
+export function onLoad() { // eslint-disable-line @typescript-eslint/no-unused-vars
   params = (window as any).arguments[0]
   ui = {
     extensions: document.getElementById('folder-import-extensions'),
@@ -44,12 +42,12 @@ function onLoad() { // eslint-disable-line @typescript-eslint/no-unused-vars
   if (!params.link) ui.mode.setAttribute('disabled', 'true')
 }
 
-function onCancel() { // eslint-disable-line @typescript-eslint/no-unused-vars
+export function onCancel() { // eslint-disable-line @typescript-eslint/no-unused-vars
   params.extensions = new Set()
   return true
 }
 
-function onAccept() { // eslint-disable-line @typescript-eslint/no-unused-vars
+export function onAccept() { // eslint-disable-line @typescript-eslint/no-unused-vars
   params.link = ui.mode && ui.mode.selectedItem === ui.link
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return
   params.extensions = new Set(Array.from(ui.extensions.options).filter((opt: XULElement) => opt.selected).map((opt: XULElement) => opt.value))

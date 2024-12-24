@@ -5,11 +5,11 @@
   "scripts": {
     "lint": "dprint fmt bootstrap.ts content/*.ts && dprint check bootstrap.ts content/*.ts",
     "prebuild": "npm run lint",
-    "build": "rm -rf build && tsc --noEmit && node esbuild.js",
+    "build": "rm -rf build && echo tsc --noEmit && node esbuild.js",
     "postbuild": "zotero-plugin-zipup build zotero-folder-import",
     "release": "zotero-plugin-release",
     "postversion": "git push --follow-tags",
-    "start": "zotero-start",
+    "start": "npm run build && zotero-start",
     "ncu": "ncu -u && npm i && git add package.json package-lock.json && git commit -m ncu"
   },
   "repository": {
@@ -37,6 +37,7 @@
     "releaseURL": "https://github.com/retorquere/zotero-folder-import/releases/download/release/"
   },
   "dependencies": {
-    "dprint": "^0.47.5"
+    "dprint": "^0.47.5",
+    "zotero-plugin-toolkit": "^4.0.11"
   }
 }

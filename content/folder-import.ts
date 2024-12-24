@@ -1,10 +1,25 @@
-Components.utils.import('resource://gre/modules/FileUtils.jsm')
-declare const FileUtils: any
-
 declare var Zotero: any // eslint-disable-line no-var
-declare const Components: any
+declare const FileUtils: any
+declare const Services: any
 
-import { Elements } from 'zotero-plugin/create-element'
+declare const Components: any
+Components.utils.import('resource://gre/modules/FileUtils.jsm')
+
+declare const ChromeUtils: any
+
+import { FilePickerHelper, ZoteroToolkit } from 'zotero-plugin-toolkit'
+const ztoolkit = new ZoteroToolkit()
+
+function prompt(title: string, body: string, defaultValue?: string): string {
+  const wrap = { value: defaultValue || '' }
+  if (Services.prompt.prompt(null, title, body, wrap, null, {})) {
+    return wrap.value
+  }
+  else {
+    return ''
+  }
+}
+
 import { DebugLog as DebugLogSender } from 'zotero-plugin/debug-log'
 import { log } from './debug'
 
@@ -32,43 +47,6 @@ declare const OS: {
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-class FilePicker { // minimal shim of Zotero FilePicker -- replace with actual picker on merge
-  public modeGetFolder: number = Components.interfaces.nsIFilePicker.modeGetFolder
-
-  public returnOK: number = Components.interfaces.nsIFilePicker.returnOK
-  public returnCancel: number = Components.interfaces.nsIFilePicker.Cancel
-
-  public file: any = null
-
-  private fp: any
-
-  constructor() {
-    this.fp = Components.classes['@mozilla.org/filepicker;1'].createInstance(Components.interfaces.nsIFilePicker)
-  }
-
-  public init(parent: Window, title: string, mode: number) {
-    this.fp.init(parent, title, mode)
-  }
-
-  public show(): Promise<number> {
-    return new Zotero.Promise(resolve => { // eslint-disable-line @typescript-eslint/no-unsafe-return
-      this.fp.open(userChoice => {
-        switch (userChoice) {
-          case Components.interfaces.nsIFilePicker.returnOK:
-          case Components.interfaces.nsIFilePicker.returnReplace:
-            this.file = this.fp.file
-            resolve(Components.interfaces.nsIFilePicker.returnOK)
-            break
-
-          default:
-            resolve(Components.interfaces.nsIFilePicker.returnCancel)
-            break
-        }
-      })
-    })
-  }
 }
 
 class FolderScanner {
@@ -216,24 +194,16 @@ export class $FolderImport {
 
   public onMainWindowLoad(win: Window) {
     log.debug('onMainWindowLoad')
-    const elements = new Elements('folder-import', win.document)
-    const id = 'folder-import-tools-menu'
 
-    if (!win.document.getElementById(id)) {
-      log.debug(`creating ${id}`)
-      const menupopup = win.document.getElementById('menu_ToolsPopup')
-        .appendChild(elements.create('menuitem', {
-          id,
-          label: 'Add Files from Folder…',
-          oncommand: () => {
-            this.addAttachmentsFromFolder(win)
-          },
-        }))
-    }
+    ztoolkit.Menu.register('menuFile', {
+      tag: 'menuitem',
+      label: 'Add Files from Folder…',
+      oncommand: 'Zotero.FolderImport.addAttachmentsFromFolder()',
+    })
   }
 
   public onMainWindowUnload(win: Window) {
-    Elements.removeAll()
+    ztoolkit.Menu.unregisterAll()
   }
 
   public update() {
@@ -295,7 +265,10 @@ export class $FolderImport {
     }
   }
 
-  public async addAttachmentsFromFolder(window: Window) {
+  private skip = true
+  public async addAttachmentsFromFolder() {
+    log.debug('addAttachmentsFromFolder')
+    const window = Zotero.getMainWindow()
     await Zotero.Schema.schemaUpdatePromise
     const zoteroPane = Zotero.getActiveZoteroPane()
 
@@ -307,18 +280,22 @@ export class $FolderImport {
       zoteroPane.displayCannotEditLibraryFilesMessage()
       return
     }
+    const collection = zoteroPane.getSelectedCollection()
+    if (!collection) {
+      Services.prompt.alert(null, 'No collection selected', 'A collection must be selected to import into')
+      return
+    }
 
-    const fp = new FilePicker()
-    fp.init(window, Zotero.getString('pane.item.attachments.select') as string, fp.modeGetFolder)
-    if (await fp.show() !== fp.returnOK) return
-    log.debug(`dir picked: ${fp.file.path}`)
+    log.debug('opening file picker')
+    const folder: string = await (new FilePickerHelper(`${Zotero.getString('fileInterface.import')} Folder`, 'folder')).open()
+    if (!folder) return
 
     Zotero.showZoteroPaneProgressMeter('Scanning for attachments...')
-    const root = new FolderScanner(fp.file.path as string, true)
+    const root = new FolderScanner(folder, true)
     await root.scan()
     Zotero.hideZoteroPaneOverlays()
 
-    Zotero.Translators.getAllForType('import')
+    // Zotero.Translators.getAllForType('import')
 
     log.debug(`scan complete: ${JSON.stringify(Array.from(root.extensions))} (${root.extensions.size})`)
     if (root.extensions.size) {
@@ -329,13 +306,16 @@ export class $FolderImport {
         libraryID: collectionTreeRow.ref.libraryID,
         progress: this,
       } // TODO: warn for .lnk files when params.link === false
-      ;(window as any).openDialog('chrome://zotero-folder-import/content/bulkimport.xul', '', 'chrome,dialog,centerscreen,modal', params)
+
+      log.debug('opening selector')
+      const selected = prompt('File extensions', 'File extensions to import', [...params.extensions].sort().join(', '))
+      params.extensions = new Set(selected.split(',').map(_ => _.trim()).filter(_ => _))
       log.debug('selected:', Array.from(params.extensions))
       if (params.extensions.size) {
         const pdfs = []
         Zotero.showZoteroPaneProgressMeter('Importing attachments...', true)
         this.status = { total: root.selected(params.extensions), done: 0 }
-        await root.import(params, zoteroPane.getSelectedCollection(), pdfs, new Set(await this.duplicates(fp.file.path as string)))
+        await root.import(params, zoteroPane.getSelectedCollection(), pdfs, new Set(await this.duplicates(folder)))
         Zotero.hideZoteroPaneOverlays()
         if (pdfs.length) {
           Zotero.showZoteroPaneProgressMeter('Fetching metadata for attachments...')

@@ -10,7 +10,7 @@ require('zotero-plugin/rdf')
 require('zotero-plugin/version')
 
 async function bundle(entry) {
-  const outdir = 'build'
+  const outdir = path.join('build', path.basename(path.dirname(entry)))
   const config = {
     entryPoints: [ entry ],
     outdir,
@@ -44,6 +44,7 @@ async function bundle(entry) {
 async function build() {
   await bundle('bootstrap.ts')
   await bundle('content/folder-import.ts')
+  await bundle('content/bulkimport.ts')
 }
 
 build().catch(err => {

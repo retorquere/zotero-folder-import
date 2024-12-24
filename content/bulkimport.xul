@@ -40,6 +40,5 @@
   </radiogroup>
   <checkbox id="item-import" label="Import items"/>
 
-  <script src="chrome://zotero/content/include.js"/>
-  <script src="chrome://zotero-folder-import/content/bulkimport.js"/>
+  <script src="bulkimport.js"/>
 </dialog>

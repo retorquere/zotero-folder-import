@@ -18,7 +18,7 @@ export async function startup({ id, version, rootURI }) {
     ['locale', 'zotero-folder-import', 'en-US', 'locale/en-US/'],
   ])
 
-  Services.scriptloader.loadSubScript(rootURI + 'folder-import.js', { rootURI, Zotero })
+  Services.scriptloader.loadSubScript(`${rootURI}content/folder-import.js`, { rootURI, Zotero })
   await Zotero.FolderImport.startup()
   log.info('startup', id, version, 'ready')
 }
