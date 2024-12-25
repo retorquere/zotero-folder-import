@@ -309,9 +309,13 @@ export class $FolderImport {
       } // TODO: warn for .lnk files when params.link === false
 
       log.debug('opening selector')
-      const selected = prompt('File extensions', 'File extensions to import', [...params.extensions].sort().join(', '))
-      params.extensions = new Set(selected.split(',').map(_ => _.trim()).filter(_ => _))
+      do {
+        const selected = prompt('File extensions', 'File extensions to import', [...root.extensions].sort().join(', '))
+        params.extensions = new Set(selected.split(',').map(_ => _.trim()).filter(_ => _))
+      }
+      while ([...params.extensions].find(ext => !root.extensions.has(ext)))
       log.debug('selected:', Array.from(params.extensions))
+
       if (params.extensions.size) {
         const pdfs = []
         Zotero.showZoteroPaneProgressMeter('Importing attachments...', true)
@@ -320,7 +324,7 @@ export class $FolderImport {
         Zotero.hideZoteroPaneOverlays()
         if (pdfs.length) {
           Zotero.showZoteroPaneProgressMeter('Fetching metadata for attachments...')
-          Zotero.RecognizePDF.autoRecognizeItems(pdfs)
+          Zotero.RecognizeDocument.autoRecognizeItems(pdfs)
           Zotero.hideZoteroPaneOverlays()
         }
       }
