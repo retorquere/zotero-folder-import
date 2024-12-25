@@ -11,16 +11,6 @@ declare const ChromeUtils: any
 import { FilePickerHelper, ZoteroToolkit } from 'zotero-plugin-toolkit'
 const ztoolkit = new ZoteroToolkit()
 
-function prompt(title: string, body: string, defaultValue?: string): string {
-  const wrap = { value: defaultValue || '' }
-  if (Services.prompt.prompt(null, title, body, wrap, null, {})) {
-    return wrap.value
-  }
-  else {
-    return ''
-  }
-}
-
 import { DebugLog as DebugLogSender } from 'zotero-plugin/debug-log'
 import { log } from './debug'
 
@@ -309,9 +299,17 @@ export class $FolderImport {
       } // TODO: warn for .lnk files when params.link === false
 
       log.debug('opening selector')
+      const defaults = {
+        selected: [...root.extensions].sort().join(', '),
+        link: !!params.link,
+      }
       do {
-        const selected = prompt('File extensions', 'File extensions to import', [...root.extensions].sort().join(', '))
-        params.extensions = new Set(selected.split(',').map(_ => _.trim()).filter(_ => _))
+        const selected = { value: defaults.selected }
+        const link = { value: defaults.link }
+        if (!Services.prompt.prompt(null, 'File extensions', 'File extensions to import', selected, 'Link instead of import', link)) return
+        log.debug({ selected, link })
+        params.extensions = new Set(selected.value.split(',').map(_ => _.trim()).filter(_ => _))
+        params.link = link.value
       }
       while ([...params.extensions].find(ext => !root.extensions.has(ext)))
       log.debug('selected:', Array.from(params.extensions))
