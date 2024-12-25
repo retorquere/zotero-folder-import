@@ -7,6 +7,7 @@ Components.utils.import('resource://gre/modules/FileUtils.jsm')
 
 declare const ChromeUtils: any
 
+// @ts-ignore
 import { FilePickerHelper, ZoteroToolkit } from 'zotero-plugin-toolkit'
 const ztoolkit = new ZoteroToolkit()
 

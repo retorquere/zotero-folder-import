@@ -4,8 +4,9 @@
   "description": "Import folder of attachments into a collection hierarchy",
   "scripts": {
     "lint": "dprint fmt bootstrap.ts content/*.ts && dprint check bootstrap.ts content/*.ts",
-    "prebuild": "npm run lint",
-    "build": "rm -rf build && echo tsc --noEmit && node esbuild.js",
+    "prebuild": "npm run lint && npm run neuter",
+    "neuter": "find node_modules/zotero-plugin-toolkit -name \\*.d.ts -exec rm {} \\;",
+    "build": "rm -rf build && tsc --noEmit && node esbuild.js",
     "postbuild": "zotero-plugin-zipup build zotero-folder-import",
     "release": "zotero-plugin-release",
     "postversion": "git push --follow-tags",

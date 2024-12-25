@@ -12,18 +12,6 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 20.x
-    - name: Cache node dependencies
-      uses: actions/cache@v3
-      env:
-        cache-name: v3
-      with:
-        path: |
-          ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
     - name: install node dependencies
       run: npm install
     - name: build
