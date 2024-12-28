@@ -1,0 +1,75 @@
+doctype xml
+window(xmlns='http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul' xmlns:html='http://www.w3.org/1999/xhtml')
+  linkset
+    html:link(rel='localization' href='toolkit/global/wizard.ftl')/
+  script(src="chrome://global/content/customElements.js")
+  script.
+    // const { extensions, defaults } = window.arguments[0]
+    const extensions = ['pdf', 'docx']
+    const defaults = { pdf: 'import' }
+
+    const config = {
+      icon: {
+        ignore: '\u1F6AB',
+        attach: '\u1F4BE',
+        link: '\u1F517',
+        import: '\u1F5C2',
+      },
+      extensions: Object.fromEntries(extensions.map(ext => [ext, defaults[ext] || 'ignore'])),
+    }
+
+    function init() {
+      for (const [mode, icon] of Object.entries(config.icon)) {
+        const button = document.querySelector(`#${mode}`)
+        button.setAttribute(`${icon} ${button.getAttribute('label')}`)
+      }
+
+      const listbox = document.querySelector('#extensions')
+      for (const ext of [...extensions].sort()) {
+        Zotero.debug(`folder-import ${ext}`)
+        const item = document.createXULElement('listitem')
+        listbox.appendChild(item)
+
+        let cell = document.createXULElement('listcell')
+        cell.setAttribute('label', ext)
+        item.appendChild(cell)
+
+        cell = document.createXULElement('listcell')
+        cell.setAttribute('label', config.icon[config.extensions[ext]])
+        item.appendChild(cell)
+      }
+    }
+
+    function setMode(newMode) {
+      const listbox = document.querySelector('#extensions')
+      const selected = listbox.selectedItems
+
+      selected.forEach(item => {
+        const [ ext, mode ] = item.querySelectorAll('listcell')
+        config.extensions[ext.getAttribute('label')] = newMode
+        mode.setAttribute('label', config.icon[newMode])
+      })
+    }
+
+    function start() {
+      const wizard = document.querySelector('#wizard')
+      wizard.getButton('cancel').disabled = true
+      wizard.canRewind = false
+    }
+  wizard#wizard(title="better-bibtex_error-report.title;" width="700" height="700")
+    wizardpage(label='Add Files from Folder…' onpageshow='init()')
+      hbox
+        listbox#extensions(flex=1 seltype='multiple')
+          listhead
+            listheader(label='extension')
+            listheader(label='action')
+          listcols
+            listcol(flex=1)
+            listcol(flex=1)
+        vbox
+          button#link(label='ignore' oncommand="setMode('ignore')")
+          button#attach(label='attach' oncommand="setMode('attach')")
+          button#link(label='link' oncommand="setMode('link')")
+          button#import(label='import' oncommand="setMode('import')")
+    wizardpage(label="Importing…" onpageshow='start()')
+      progressmeter#progress

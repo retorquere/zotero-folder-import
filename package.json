@@ -25,12 +25,15 @@
   },
   "homepage": "https://github.com/retorquere/zotero-folder-import",
   "devDependencies": {
+    "pretty": "^2.0.0",
+    "pug": "^3.0.3",
     "esbuild": "^0.24.2",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
-    "zotero-plugin": "3.3.0",
-    "zotero-types": "^3.0.10"
+    "zotero-types": "^3.0.10",
+    "dprint": "^0.48.0",
+    "zotero-plugin": "3.3.2"
   },
   "xpi": {
     "name": "Folder Import for Zotero",
@@ -38,7 +41,6 @@
     "releaseURL": "https://github.com/retorquere/zotero-folder-import/releases/download/release/"
   },
   "dependencies": {
-    "dprint": "^0.48.0",
     "zotero-plugin-toolkit": "^4.0.16"
   }
 }

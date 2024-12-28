@@ -303,6 +303,15 @@ export class $FolderImport {
         selected: [...root.extensions].sort().join(', '),
         link: !!params.link,
       }
+
+      window.openDialog('chrome://zotero-folder-import/content/wizard.xhtml', '', 'chrome,dialog,centerscreen,modal', {
+        extensions: [...root.extensions],
+        defaults: {
+          pdf: 'attach',
+          bib: 'import',
+        },
+      })
+
       do {
         const selected = { value: defaults.selected }
         const link = { value: defaults.link }

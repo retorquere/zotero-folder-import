@@ -2,6 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const esbuild = require('esbuild')
 const rmrf = require('rimraf')
+const pug = require('pug')
+const pretty = require('pretty')
 
 rmrf.sync('gen')
 
@@ -45,6 +47,7 @@ async function build() {
   await bundle('bootstrap.ts')
   await bundle('content/folder-import.ts')
   await bundle('content/bulkimport.ts')
+  fs.writeFileSync('build/content/wizard.xhtml', pretty(pug.compileFile('content/wizard.pug')()))
 }
 
 build().catch(err => {
