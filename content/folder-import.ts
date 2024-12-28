@@ -7,22 +7,11 @@ Components.utils.import('resource://gre/modules/FileUtils.jsm')
 
 declare const ChromeUtils: any
 
-// @ts-ignore
 import { FilePickerHelper, ZoteroToolkit } from 'zotero-plugin-toolkit'
 const ztoolkit = new ZoteroToolkit()
 
 import { DebugLog as DebugLogSender } from 'zotero-plugin/debug-log'
 import { log } from './debug'
-
-type DirectoryEntry = {
-  isDir: boolean
-  name: string
-}
-
-const NS = {
-  XUL: 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul',
-  XHTML: 'http://www.w3.org/1999/xhtml',
-}
 
 declare const OS: {
   Path: {
@@ -166,7 +155,6 @@ class FolderScanner {
 }
 
 export class $FolderImport {
-  private initialized = false
   private status: { total: number; done: number }
 
   public async startup() {
@@ -256,10 +244,8 @@ export class $FolderImport {
     }
   }
 
-  private skip = true
   public async addAttachmentsFromFolder() {
     log.debug('addAttachmentsFromFolder')
-    const window = Zotero.getMainWindow()
     await Zotero.Schema.schemaUpdatePromise
     const zoteroPane = Zotero.getActiveZoteroPane()
 
@@ -304,6 +290,8 @@ export class $FolderImport {
         link: !!params.link,
       }
 
+      /*
+      const window = Zotero.getMainWindow()
       window.openDialog('chrome://zotero-folder-import/content/wizard.xhtml', '', 'chrome,dialog,centerscreen,modal', {
         extensions: [...root.extensions],
         defaults: {
@@ -311,6 +299,7 @@ export class $FolderImport {
           bib: 'import',
         },
       })
+      */
 
       do {
         const selected = { value: defaults.selected }
