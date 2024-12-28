@@ -4,8 +4,7 @@
   "description": "Import folder of attachments into a collection hierarchy",
   "scripts": {
     "lint": "dprint fmt bootstrap.ts content/*.ts && dprint check bootstrap.ts content/*.ts",
-    "prebuild": "npm run lint && npm run neuter",
-    "neuter": "find node_modules/zotero-plugin-toolkit -name \\*.d.ts -exec rm {} \\;",
+    "prebuild": "npm run lint",
     "build": "rm -rf build && tsc --noEmit && node esbuild.js",
     "postbuild": "zotero-plugin-zipup build zotero-folder-import",
     "release": "zotero-plugin-release",
@@ -30,7 +29,8 @@
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
-    "zotero-plugin": "3.3.0"
+    "zotero-plugin": "3.3.0",
+    "zotero-types": "^3.0.10"
   },
   "xpi": {
     "name": "Folder Import for Zotero",
@@ -39,6 +39,6 @@
   },
   "dependencies": {
     "dprint": "^0.48.0",
-    "zotero-plugin-toolkit": "^4.0.11"
+    "zotero-plugin-toolkit": "^4.0.16"
   }
 }
