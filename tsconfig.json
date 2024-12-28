@@ -13,9 +13,10 @@
     "downlevelIteration": true,
     "lib": [ "es2019", "dom", "ES2021.WeakRef" ],
     "types": [ "node" ],
-    "typeRoots": [ "./node_modules/@types" ]
+    "typeRoots": [ "./node_modules/@types" ],
+    "skipDefaultLibCheck": true,
   },
-  "include": [ "bootstrap.ts", "content/folder-import.ts", "content/globals.d.ts" ],
+  "include": [ "bootstrap.ts", "content/folder-import.ts", "content/globals.d.ts", "node_modules/zotero-types" ],
   "exclude": [
     "**/*.spec.ts"
   ]

@@ -278,7 +278,7 @@ export class $FolderImport {
     }
 
     log.debug('opening file picker')
-    const folder: string = await (new FilePickerHelper(`${Zotero.getString('fileInterface.import')} Folder`, 'folder')).open()
+    const folder = await (new FilePickerHelper(`${Zotero.getString('fileInterface.import')} Folder`, 'folder')).open()
     if (!folder) return
 
     Zotero.showZoteroPaneProgressMeter('Scanning for attachments...')
