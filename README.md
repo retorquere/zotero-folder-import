@@ -9,7 +9,7 @@ You can use the .xpi file from the link above to install in the Zotero standalon
 * Open the gear menu in the top right
 * Select "Install Add-on From File..." .
 
-Import folder of attachments into a collection hierarchy. Click the green "+" button above the item list, and select "Add files from folder"
+Import folder of attachments into a collection hierarchy. Select "Add files from folder" from the file menu.
 
 # Support - read carefully
 
