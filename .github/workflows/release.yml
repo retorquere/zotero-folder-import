@@ -12,8 +12,6 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 20.x
-    - name: dprint does not play nice with cross-platform testing
-      run: rm package-lock.json
     - name: install node dependencies
       run: npm install
     - name: build
