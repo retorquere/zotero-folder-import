@@ -29,6 +29,10 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+function j(o: any) {
+  return JSON.stringify(o, null, 2)
+}
+
 class FolderScanner {
   files: string[] = []
   folders: FolderScanner[] = []
@@ -43,13 +47,14 @@ class FolderScanner {
   }
 
   public async scan() {
+    log.debug('45: scan of', j(this.path), ':', await IOUtils.getChildren(this.path))
     for (const entry of (await IOUtils.getChildren(this.path))) {
       const info = await IOUtils.stat(entry)
+      log.info(j(this.path), j(entry), info)
       if (info.type === 'directory') {
         this.folders.push(new FolderScanner(entry, false))
       }
       else {
-        log.info(`${this.path}: file ${JSON.stringify(entry)}`)
         this.files.push(entry)
         const ext = this.extension(entry)
         if (ext && ext !== 'lnk') this.extensions.add(ext)
@@ -274,7 +279,7 @@ export class $FolderImport {
 
     // Zotero.Translators.getAllForType('import')
 
-    log.debug(`scan complete: ${JSON.stringify(Array.from(root.extensions))} (${root.extensions.size})`)
+    log.debug(`scan complete: ${j(Array.from(root.extensions))} (${root.extensions.size})`)
     if (root.extensions.size) {
       const collectionTreeRow = zoteroPane.getCollectionTreeRow()
       const params = {

@@ -31,7 +31,7 @@
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "zotero-types": "^4.0.3",
+    "zotero-types": "^4.0.4",
     "dprint": "^0.50.0",
     "zotero-plugin": "5.0.18"
   },
@@ -41,6 +41,6 @@
     "releaseURL": "https://github.com/retorquere/zotero-folder-import/releases/download/release/"
   },
   "dependencies": {
-    "zotero-plugin-toolkit": "^5.0.0"
+    "zotero-plugin-toolkit": "^5.0.1"
   }
 }
