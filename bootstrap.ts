@@ -16,7 +16,6 @@ export async function startup({ id, version, rootURI }) {
   const manifestURI = Services.io.newURI(`${rootURI}manifest.json`)
   chromeHandle = aomStartup.registerChrome(manifestURI, [
     ['content', 'zotero-folder-import', 'content/'],
-    ['locale', 'zotero-folder-import', 'en-US', 'locale/en-US/'],
   ])
 
   Services.scriptloader.loadSubScript(`${rootURI}content/folder-import.js`, { rootURI, Zotero })
