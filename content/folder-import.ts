@@ -3,8 +3,7 @@ declare const Services: any
 declare const Components: any
 declare const ChromeUtils: any
 
-import { FilePickerHelper, ZoteroToolkit } from 'zotero-plugin-toolkit'
-const ztoolkit = new ZoteroToolkit()
+import { FilePickerHelper } from 'zotero-plugin-toolkit'
 
 import { DebugLog as DebugLogSender } from 'zotero-plugin/debug-log'
 import { log } from './debug'
@@ -151,7 +150,9 @@ class FolderScanner {
 }
 
 export class $FolderImport {
-  private status: { total: number; done: number }
+  private static readonly menuID = 'folder-import/add-files-from-folder'
+  private status: { total: number; done: number } = { total: 0, done: 0 }
+  private registeredMenuID: string | false = false
 
   public async startup() {
     await Zotero.initializationPromise
@@ -169,16 +170,28 @@ export class $FolderImport {
 
   public onMainWindowLoad(win: Window) {
     log.debug('onMainWindowLoad')
+    if (this.registeredMenuID) return
 
-    ztoolkit.Menu.register('menuFile', {
-      tag: 'menuitem',
-      label: 'Add Files from Folder…',
-      oncommand: 'Zotero.FolderImport.addAttachmentsFromFolder()',
+    this.registeredMenuID = Zotero.MenuManager.registerMenu({
+      menuID: $FolderImport.menuID,
+      pluginID: 'folder-import',
+      target: 'main/menubar/file',
+      menus: [{
+        menuType: 'menuitem',
+        onShowing: (_event, context) => {
+          context.menuElem?.setAttribute('label', 'Add Files from Folder...')
+        },
+        onCommand: () => {
+          void this.addAttachmentsFromFolder()
+        },
+      }],
     })
   }
 
   public onMainWindowUnload(win: Window) {
-    ztoolkit.Menu.unregisterAll()
+    if (!this.registeredMenuID) return
+    Zotero.MenuManager.unregisterMenu(this.registeredMenuID)
+    this.registeredMenuID = false
   }
 
   public update() {

@@ -30,7 +30,7 @@ export async function shutdown() {
     chromeHandle.destruct()
     chromeHandle = undefined
   }
-  Zotero.FolderImport = null
+  delete (Zotero as any).FolderImport
 }
 
 export function onMainWindowLoad({ window }) {
