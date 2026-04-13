@@ -1,7 +1,7 @@
 {
   "name": "zotero-folder-import",
   "type": "module",
-  "version": "0.0.10",
+  "version": "1.0.0",
   "description": "Import folder of attachments into a collection hierarchy",
   "scripts": {
     "lint": "dprint fmt bootstrap.ts content/*.ts && dprint check bootstrap.ts content/*.ts",
