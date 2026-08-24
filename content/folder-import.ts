@@ -5,7 +5,7 @@ declare const ChromeUtils: any
 
 import { FilePickerHelper } from 'zotero-plugin-toolkit'
 
-import { DebugLog as DebugLogSender } from 'zotero-plugin/debug-log'
+import { DebugLogSender } from 'zotero-plugin/debug-log'
 import { log } from './debug'
 
 declare const OS: {
@@ -156,7 +156,8 @@ export class $FolderImport {
 
   public async startup() {
     await Zotero.initializationPromise
-    DebugLogSender.register('Folder import', [])
+    const sender = new DebugLogSender('zotero-folder-import@iris-advies.com', 'Folder import debug log', ['extensions.folder-import.'])
+    sender.enabled = true
     for (const win of Zotero.getMainWindows()) {
       if (win.ZoteroPane) this.onMainWindowLoad(win)
     }
