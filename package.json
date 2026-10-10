@@ -33,8 +33,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^7.0.2",
     "zotero-types": "^4.1.3",
-    "dprint": "^0.57.4",
-    "zotero-plugin": "11.0.1"
+    "dprint": "^0.61.1",
+    "zotero-plugin": "11.0.12"
   },
   "xpi": {
     "name": "Folder Import for Zotero",
@@ -44,11 +44,11 @@
     "maxVersion": "10.*"
   },
   "dependencies": {
-    "zotero-plugin-toolkit": "^5.2.0"
+    "zotero-plugin-toolkit": "^6.0.0"
   },
   "allowScripts": {
-    "dprint@0.57.4": true,
     "es5-ext@0.10.64": true,
-    "esbuild@0.28.2": true
+    "esbuild@0.28.2": true,
+    "dprint@0.61.1": true
   }
 }

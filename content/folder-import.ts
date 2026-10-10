@@ -267,10 +267,16 @@ export class $FolderImport {
       zoteroPane.displayCannotEditLibraryFilesMessage()
       return
     }
-    const collection = zoteroPane.getSelectedCollection()
-    if (!collection) {
-      Services.prompt.alert(null, 'No collection selected', 'A collection must be selected to import into')
-      return
+    const collections = zoteroPane.getSelectedCollections()
+    switch (collections.length) {
+      case 0:
+        Services.prompt.alert(null, 'No collection selected', 'A collection must be selected to import into')
+        return
+      case 1:
+        break
+      default:
+        Services.prompt.alert(null, 'Select only one collection', 'A single collection must be selected to import into')
+        return
     }
 
     log.debug('opening file picker')
